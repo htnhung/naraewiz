@@ -11,6 +11,8 @@ if [ -e $1/framework/oat ]; then
 fi
 
 SYSDIR=$1 # system dir
+PREBUILTDIR=$(realpath _Prebuilt)
+PATCHDIR=$(realpath _Patch)
 
 ECHOINFO() {
 	echo "$(tput bold) ::: $@ :::$(tput sgr0)"
@@ -19,6 +21,21 @@ ECHOINFO() {
 ABORT() {
 	echo "$(tput setaf 1)$(tput bold) !!! ERROR !!!$(tput sgr0)"
 	exit 1
+}
+
+APPLY_PATCH() {
+	echo "Applying patch $1"
+	patch -p1 --forward --merge --no-backup-if-mismatch < $1
+	if [ $? -ne 0 ]; then
+		while read -p "$(tput setaf 1)$(tput bold)Patch failed, abort? (y/N)$(tput sgr0)" PATCH_CONTINUE; do
+			case "$PATCH_CONTINUE" in
+			Y | y )
+				exit 1;;
+			* )
+				break;;
+			esac
+		done
+	fi
 }
 
 read -p "$(tput bold)Make sure you entered the right directory path and press Enter to continue.$(tput sgr0)"
@@ -53,67 +70,23 @@ ECHOINFO "Preventing stock recovery from being restored"
 [ -e recovery-from-boot.p ] && mv recovery-from-boot.p recovery-from-boot.bak
 
 #
-# Fix sdcard RW
-#
-ECHOINFO "Fixing media storage RW permission"
-echo '--- a/etc/permissions/platform.xml       2016-06-11 14:09:42.941502800 +0900
-+++ b/etc/permissions/platform.xml        2016-06-05 23:52:09.454970100 +0900
-@@ -65,6 +65,7 @@
-     <permission name="android.permission.WRITE_MEDIA_STORAGE" >
-         <group gid="media_rw" />
-         <group gid="sdcard_rw" />
-+        <group gid="sdcard_all" />
-     </permission>
-
-     <permission name="android.permission.ACCESS_MTP" >' | patch -p1 --forward
-rm etc/permissions/platform.xml.* 2>/dev/null
-
-#
 # Replace bootanimation binary with that of CM so we can use *.zip instead of annoying *.qmg
 #
 ECHOINFO "Prepare for new bootanimations"
 [ ! -e bin/bootanimation.bak ] && mv bin/bootanimation bin/bootanimation.bak
 
 #
-# Update floating_feature.xml for Edge feature support
+# Apply patches
 #
-ECHOINFO "Updating floating_feature.xml for Edge feature support"
-echo '--- a/etc/floating_feature.xml   2016-06-05 23:11:44.873739200 +0900
-+++ b/etc/floating_feature.xml    2016-06-05 23:52:03.224265700 +0900
-@@ -22,7 +22,7 @@
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_ALTER_MODEL_NAME></SEC_FLOATING_FEATURE_COMMON_CONFIG_ALTER_MODEL_NAME>
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_CHANGEABLE_UI></SEC_FLOATING_FEATURE_COMMON_CONFIG_CHANGEABLE_UI>
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_CROSSAPP></SEC_FLOATING_FEATURE_COMMON_CONFIG_CROSSAPP>
--    <SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE></SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE>
-+    <SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE>people,task,circle,panel,-nightclock</SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE>
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE_STRIPE>-1</SEC_FLOATING_FEATURE_COMMON_CONFIG_EDGE_STRIPE>
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_FESTIVAL_EFFECT_VERSION>2</SEC_FLOATING_FEATURE_COMMON_CONFIG_FESTIVAL_EFFECT_VERSION>
-     <SEC_FLOATING_FEATURE_COMMON_CONFIG_HIDE_STATUS_BAR>LAND</SEC_FLOATING_FEATURE_COMMON_CONFIG_HIDE_STATUS_BAR>
-@@ -63,7 +63,7 @@
-     <SEC_FLOATING_FEATURE_FMRADIO_REMOVE_AF_MENU>FALSE</SEC_FLOATING_FEATURE_FMRADIO_REMOVE_AF_MENU>
-     <SEC_FLOATING_FEATURE_FMRADIO_SUPPORT_HYBRID_RADIO>FALSE</SEC_FLOATING_FEATURE_FMRADIO_SUPPORT_HYBRID_RADIO>
-     <SEC_FLOATING_FEATURE_FMRADIO_SUPPORT_RDS>TRUE</SEC_FLOATING_FEATURE_FMRADIO_SUPPORT_RDS>
--    <SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_TASK_EDGE_EMBEDDED_ITEM></SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_TASK_EDGE_EMBEDDED_ITEM>
-+    <SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_TASK_EDGE_EMBEDDED_ITEM>panorama</SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_TASK_EDGE_EMBEDDED_ITEM>
-     <SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_CUSTOM_STARTING_WINDOW>TRUE</SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_CUSTOM_STARTING_WINDOW>
-     <SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_SMOOTH_SCROLL>TRUE</SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_SMOOTH_SCROLL>
-     <SEC_FLOATING_FEATURE_GALLERY_SUPPORT_EVENTSHARE>TRUE</SEC_FLOATING_FEATURE_GALLERY_SUPPORT_EVENTSHARE>
-@@ -100,7 +100,7 @@
-     <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_REGISTER_TO_SPLANNER>FALSE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_REGISTER_TO_SPLANNER>
-     <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SCHEDULED_MESSAGES>FALSE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SCHEDULED_MESSAGES>
-     <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SELECTION_MODE>TRUE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SELECTION_MODE>
--    <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SPLIT_MODE>FALSE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SPLIT_MODE>
-+    <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SPLIT_MODE>TRUE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_SPLIT_MODE>
-     <SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_UNKNOWN_URL_LINK>FALSE</SEC_FLOATING_FEATURE_MESSAGE_SUPPORT_UNKNOWN_URL_LINK>
-     <SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_ALBUMART_3DAUDIO>TRUE</SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_ALBUMART_3DAUDIO>
-     <SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>TRUE</SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>' | patch -p1 --forward
-rm etc/floating_feature.xml.* 2>/dev/null
+ECHOINFO "Applying patches"
+find $PATCHDIR -name '*.patch' | while read file; do APPLY_PATCH $file; done
+find $PATCHDIR -name '*.sh' | while read file; do . $file; done
 
 #
 # Import prebuilts
 #
 ECHOINFO "Importing prebuilts"
-ls -d _Prebuilt/*/ | while read file; do cp -R $file/* ./; done
+ls -d $PREBUILTDIR/*/ | while read file; do cp -R $file/* ./; done
 
 #
 # Optimize framework : I need to find a zipalign binary that works on bash on windows first.
