@@ -127,6 +127,7 @@ echo '--- a/etc/floating_feature.xml   2016-06-05 23:11:44.873739200 +0900
      <SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>TRUE</SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>' | patch -p1 --forward
 rm etc/floating_feature.xml.* 2>/dev/null
 
+sed -i -e 's/buildinfo.sh/buildinfo.sh\n# naraewiz powered/g' build.prop
 #
 # Import prebuilts
 #
