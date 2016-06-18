@@ -16,3 +16,6 @@ etc/secure_storage/com.sec.knox*
 preloadedkiosk*
 preloadedsso*
 preloadedmdm*
+media/boot*.qmg*
+media/crypt_boot*.qmg*
+media/shutdown.qmg*

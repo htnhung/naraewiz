@@ -1,8 +1,8 @@
 #!/bin/bash
 # Automated NaraeWiz ROM maker for G930K
 
-if [[ ! -e $1/build.prop ]] || [[ "$1" == "" ]]; then
-	echo "$(tput setaf 1)$(tput bold)Input correct /system directory path.$(tput sgr0)"
+if [ ! -e $1/build.prop ]; then
+	echo "$(tput setaf 1)$(tput bold)Input /system directory path.$(tput sgr0)"
 	exit 1
 fi
 if [ -e $1/framework/oat ]; then
@@ -11,8 +11,7 @@ if [ -e $1/framework/oat ]; then
 fi
 
 SYSDIR=$1 # system dir
-NWPDIR=_Prebuilt # naraewiz prebuilt dir
-NWDEL=del.txt
+
 ECHOINFO() {
 	echo "$(tput bold) ::: $@ :::$(tput sgr0)"
 }
@@ -25,33 +24,20 @@ ABORT() {
 read -p "$(tput bold)Make sure you entered the right directory path and press Enter to continue.$(tput sgr0)"
 
 cd $SYSDIR
-ECHOINFO "Removing Knox"
-cat $(NWDEL) | while read file; do
+
+#
+# NaraeWiz signature
+#
+sed -i -e 's/buildinfo.sh/buildinfo.sh\n# Powered by NaraeWiz!/g' build.prop
+
+#
+# Clean up unnecessary stuff
+#
+ECHOINFO "Removing spys"
+cat remove.txt | while read file; do
 	rm -rf $file
 done
-#
-# DE-KNOX
-#
-
-#rm -rf *app/BBCAgent*
-#rm -rf *app/Bridge*
-#rm -rf *app/ContainerAgent*
-#rm -rf *app/ContainerEventsRelayManager*
-#rm -rf *app/kioskdefault*
-#rm -rf *app/KLMSAgent*
-#rm -rf *app/Knox*
-#rm -rf *app/KNOX*
-#rm -rf *app/RCPComponents*
-#rm -rf *app/SwitchKnoxI*
-#rm -rf *app/UniversalMDMClient*
-#rm -rf *app/SecurityLogAgent*
-#rm -rf *app/FotaAgent*
-#rm -rf container*
-#rm -rf etc/secure_storage/com.sec.knox*
-#rm -rf preloadedkiosk*
-#rm -rf preloadedsso*
-#rm -rf preloadedmdm*
-echo "Possible leftovers :"
+echo "Possible knox leftovers :"
 find . -iname '*knox*' -exec echo {} \;
 
 #
@@ -83,14 +69,10 @@ echo '--- a/etc/permissions/platform.xml       2016-06-11 14:09:42.941502800 +09
 rm etc/permissions/platform.xml.* 2>/dev/null
 
 #
-# Replace bootanimation
+# Replace bootanimation binary with that of CM so we can use *.zip instead of annoying *.qmg
 #
-ECHOINFO "Replacing bootanimation"
+ECHOINFO "Prepare for new bootanimations"
 [ ! -e bin/bootanimation.bak ] && mv bin/bootanimation bin/bootanimation.bak
-rm media/boot*.qmg* 2>/dev/null
-rm media/crypt_boot*.qmg* 2>/dev/null
-rm media/shutdown.qmg* 2>/dev/null
-cp -R $NWPDIR/bootanim/* ./
 
 #
 # Update floating_feature.xml for Edge feature support
@@ -127,15 +109,14 @@ echo '--- a/etc/floating_feature.xml   2016-06-05 23:11:44.873739200 +0900
      <SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>TRUE</SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>' | patch -p1 --forward
 rm etc/floating_feature.xml.* 2>/dev/null
 
-sed -i -e 's/buildinfo.sh/buildinfo.sh\n# naraewiz powered/g' build.prop
 #
 # Import prebuilts
 #
-ECHOINFO "Importing prebuilt stuff"
-ls -d $NWPDIR/*/ | while read i; do cp -R $i/* ./; done
+ECHOINFO "Importing prebuilts"
+ls -d _Prebuilt/*/ | while read file; do cp -R $file/* ./; done
 
 #
-# Optimize framework
+# Optimize framework : I need to find a zipalign binary that works on bash on windows first.
 #
 #ECHOINFO "Optimizing framework files"
 #find . -type f -name '*.jar' -maxdepth 1 | while read i; do 7z x $i -otest &>NUL; cd test; jar -cf0M $i *; zipalign -f 4 $i ../$i; cd ..; rm -r test; done
