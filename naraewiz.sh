@@ -12,7 +12,7 @@ fi
 
 SYSDIR=$1 # system dir
 NWPDIR=_Prebuilt # naraewiz prebuilt dir
-
+NWDEL=del.txt
 ECHOINFO() {
 	echo "$(tput bold) ::: $@ :::$(tput sgr0)"
 }
@@ -25,29 +25,32 @@ ABORT() {
 read -p "$(tput bold)Make sure you entered the right directory path and press Enter to continue.$(tput sgr0)"
 
 cd $SYSDIR
-
+ECHOINFO "Removing Knox"
+cat $(NWDEL) | while read file; do
+	rm -rf $file
+done
 #
 # DE-KNOX
 #
-ECHOINFO "Removing Knox"
-rm -rf *app/BBCAgent*
-rm -rf *app/Bridge*
-rm -rf *app/ContainerAgent*
-rm -rf *app/ContainerEventsRelayManager*
-rm -rf *app/kioskdefault*
-rm -rf *app/KLMSAgent*
-rm -rf *app/Knox*
-rm -rf *app/KNOX*
-rm -rf *app/RCPComponents*
-rm -rf *app/SwitchKnoxI*
-rm -rf *app/UniversalMDMClient*
-rm -rf *app/SecurityLogAgent*
-rm -rf *app/FotaAgent*
-rm -rf container*
-rm -rf etc/secure_storage/com.sec.knox*
-rm -rf preloadedkiosk*
-rm -rf preloadedsso*
-rm -rf preloadedmdm*
+
+#rm -rf *app/BBCAgent*
+#rm -rf *app/Bridge*
+#rm -rf *app/ContainerAgent*
+#rm -rf *app/ContainerEventsRelayManager*
+#rm -rf *app/kioskdefault*
+#rm -rf *app/KLMSAgent*
+#rm -rf *app/Knox*
+#rm -rf *app/KNOX*
+#rm -rf *app/RCPComponents*
+#rm -rf *app/SwitchKnoxI*
+#rm -rf *app/UniversalMDMClient*
+#rm -rf *app/SecurityLogAgent*
+#rm -rf *app/FotaAgent*
+#rm -rf container*
+#rm -rf etc/secure_storage/com.sec.knox*
+#rm -rf preloadedkiosk*
+#rm -rf preloadedsso*
+#rm -rf preloadedmdm*
 echo "Possible leftovers :"
 find . -iname '*knox*' -exec echo {} \;
 
@@ -124,6 +127,7 @@ echo '--- a/etc/floating_feature.xml   2016-06-05 23:11:44.873739200 +0900
      <SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>TRUE</SEC_FLOATING_FEATURE_MMFW_SUPPORT_MUSIC_AUTO_RECOMMENDATION>' | patch -p1 --forward
 rm etc/floating_feature.xml.* 2>/dev/null
 
+sed -i -e 's/buildinfo.sh/buildinfo.sh\n# naraewiz powered/g' build.prop
 #
 # Import prebuilts
 #
