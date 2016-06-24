@@ -136,7 +136,8 @@ ls -d $PREBUILTDIR/*/ | while read file; do cp -R $file/* ./; done
 #
 if [ $IS_LINUX -eq 1 ]; then
 ECHOINFO "Optimizing framework files"
-find . -type f -name '*.jar' -maxdepth 1 | while read file; do
+cd framework
+for file in *.jar; do
 	7z x $file -otest &> /dev/null
 	cd test
 	jar -cf0M $file *
@@ -144,7 +145,7 @@ find . -type f -name '*.jar' -maxdepth 1 | while read file; do
 	cd ..
 	rm -r test
 done
-find . -type f -name '*.apk' -maxdepth 1 | while read file; do
+for file in *.apk; do
 	7z x $file -otest &> /dev/null
 	cd test
 	7z a -tzip $file * -mx0 &> /dev/null
@@ -153,5 +154,6 @@ find . -type f -name '*.apk' -maxdepth 1 | while read file; do
 	rm -r test
 done
 fi
+cd ..
 
 ECHOINFO "DONE."
