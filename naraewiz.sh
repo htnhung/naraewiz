@@ -23,7 +23,8 @@ else
 fi
 
 ECHOINFO() {
-	echo "$(tput bold) ::: $@ :::$(tput sgr0)"
+	echo ""
+	echo "$(tput setaf 6)$(tput bold)    ::: $@ :::$(tput sgr0)"
 }
 
 ABORT() {
@@ -32,7 +33,7 @@ ABORT() {
 }
 
 APPLY_PATCH() {
-	echo "Applying patch $1"
+	echo "$(tput bold)Applying patch :$(tput sgr0) $1"
 	patch -p1 --forward --merge --no-backup-if-mismatch < $1
 	if [ $? -ne 0 ]; then
 	while read -p "$(tput setaf 1)$(tput bold)Patch failed, abort? (y/N)$(tput sgr0)" PATCH_CONTINUE; do
@@ -96,12 +97,22 @@ for i in $PATCHDIR/*.sh; do $i; done
 ECHOINFO "Modding apk's & jar's"
 for WORKDIR in app priv-app framework; do
 ls $MODDIR/$WORKDIR | while read i; do
-	cd $WORKDIR/$i || cd $WORKDIR
-	apktool d $i.apk || apktool d $i.jar
+	cd $WORKDIR/$i || cd $WORKDIR 2> /dev/null
+	if [ -e $i.apk ]; then
+		mkdir -p $SYSDIR/BAK/$WORKDIR/$i
+		cp $i.apk $SYSDIR/BAK/$WORKDIR/$i/$i.apk
+		apktool d $i.apk -o $i
+	elif [ -e $i.jar ]; then
+		mkdir -p $SYSDIR/BAK/$WORKDIR
+		cp $i.jar $SYSDIR/BAK/$WORKDIR/$i.jar
+		apktool d $i.jar -o $i
+	else
+		ABORT
+	fi
 	cd $i
 	for k in $MODDIR/$WORKDIR/$i/*.patch; do APPLY_PATCH $k; done
 	for k in $MODDIR/$WORKDIR/$i/*.sh; do $k; done
-	apktool b -c . || ABORT
+	apktool b -c .
 	if [ $IS_LINUX -eq 1 ]; then
 		zipalign -f 4 dist/$i.apk ../$i.apk || zipalign -f 4 dist/$i.jar ../$i.jar
 	else
