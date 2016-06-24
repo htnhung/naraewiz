@@ -1,0 +1,14 @@
+diff -urN imsservice_hero_ape7_orig.apk/res/values/drawables.xml imsservice_hero_ape7.apk/res/values/drawables.xml
+--- imsservice_hero_ape7_orig.apk/res/values/drawables.xml	1970-01-01 09:00:00.000000000 +0900
++++ imsservice_hero_ape7.apk/res/values/drawables.xml	2016-04-28 19:24:14.898546700 +0900
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <item type="drawable" name="stat_sys_hd_mode_skt">false</item>
++    <item type="drawable" name="stat_sys_lte_mode_lgt">false</item>
++    <item type="drawable" name="stat_sys_lte_mode_lgt_dim">false</item>
++    <item type="drawable" name="stat_sys_lte_mode_lgt_null">false</item>
++    <item type="drawable" name="stat_sys_phone_call_kt_focus">false</item>
++    <item type="drawable" name="stat_sys_phone_call_kt_normal">false</item>
++    <item type="drawable" name="stat_sys_phone_endcall_kt">false</item>
++</resources>

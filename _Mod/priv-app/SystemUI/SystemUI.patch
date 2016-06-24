@@ -1,0 +1,120 @@
+diff -urN SystemUI_hero_ape7_orig.apk/smali/com/android/systemui/statusbar/Feature.smali SystemUI_hero_ape7.apk/smali/com/android/systemui/statusbar/Feature.smali
+--- SystemUI_hero_ape7_orig.apk/smali/com/android/systemui/statusbar/Feature.smali	2016-06-24 05:26:55.398127900 +0900
++++ SystemUI_hero_ape7.apk/smali/com/android/systemui/statusbar/Feature.smali	2016-06-06 17:37:42.769853400 +0900
+@@ -2590,6 +2590,8 @@
+     move v0, v1
+ 
+     :goto_21
++    const/4 v0, 0x0
++
+     sput-boolean v0, Lcom/android/systemui/statusbar/Feature;->mShowMobileDataOffPopup:Z
+ 
+     .line 273
+diff -urN SystemUI_hero_ape7_orig.apk/smali/com/android/systemui/usb/StorageNotification.smali SystemUI_hero_ape7.apk/smali/com/android/systemui/usb/StorageNotification.smali
+--- SystemUI_hero_ape7_orig.apk/smali/com/android/systemui/usb/StorageNotification.smali	2016-06-24 05:26:56.275390300 +0900
++++ SystemUI_hero_ape7.apk/smali/com/android/systemui/usb/StorageNotification.smali	2016-06-06 00:13:53.636336100 +0900
+@@ -2548,12 +2548,13 @@
+ 
+     const/4 v12, 0x0
+ 
+-    .line 550
++    goto :goto_1
++
+     invoke-virtual {p1}, Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
+ 
+     move-result-object v8
+ 
+-    if-nez v8, :cond_1
++    if-nez v8, :cond_2
+ 
+     .line 551
+     const-string v8, "StorageNotification"
+@@ -2563,12 +2564,12 @@
+     invoke-static {v8, v9}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+ 
+     .line 603
+-    :cond_0
+-    :goto_0
++    :cond_1
++    :goto_1
+     return-object v7
+ 
+     .line 554
+-    :cond_1
++    :cond_2
+     iget-object v8, p0, Lcom/android/systemui/usb/StorageNotification;->mStorageManager:Landroid/os/storage/StorageManager;
+ 
+     invoke-virtual {p1}, Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
+@@ -2591,27 +2592,27 @@
+ 
+     move-result v8
+ 
+-    if-eqz v8, :cond_2
++    if-eqz v8, :cond_3
+ 
+     invoke-virtual {v2}, Landroid/os/storage/DiskInfo;->isAdoptable()Z
+ 
+     move-result v8
+ 
+-    if-nez v8, :cond_0
++    if-nez v8, :cond_1
+ 
+     .line 563
+-    :cond_2
++    :cond_3
+     invoke-virtual {v2}, Landroid/os/storage/DiskInfo;->isAdoptable()Z
+ 
+     move-result v7
+ 
+-    if-eqz v7, :cond_3
++    if-eqz v7, :cond_4
+ 
+     invoke-virtual {v4}, Landroid/os/storage/VolumeRecord;->isInited()Z
+ 
+     move-result v7
+ 
+-    if-nez v7, :cond_3
++    if-nez v7, :cond_4
+ 
+     .line 564
+     invoke-virtual {v2}, Landroid/os/storage/DiskInfo;->getDescription()Ljava/lang/String;
+@@ -2716,13 +2717,13 @@
+ 
+     move-result-object v7
+ 
+-    goto/16 :goto_0
++    goto/16 :goto_1
+ 
+     .line 582
+     .end local v3    # "initIntent":Landroid/app/PendingIntent;
+     .end local v5    # "text":Ljava/lang/CharSequence;
+     .end local v6    # "title":Ljava/lang/CharSequence;
+-    :cond_3
++    :cond_4
+     invoke-virtual {v2}, Landroid/os/storage/DiskInfo;->getDescription()Ljava/lang/String;
+ 
+     move-result-object v6
+@@ -2817,7 +2818,7 @@
+ 
+     move-result v7
+ 
+-    if-eqz v7, :cond_4
++    if-eqz v7, :cond_5
+ 
+     .line 600
+     invoke-virtual {p1}, Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
+@@ -2831,12 +2832,12 @@
+     invoke-virtual {v1, v7}, Landroid/app/Notification$Builder;->setDeleteIntent(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;
+ 
+     .line 603
+-    :cond_4
++    :cond_5
+     invoke-virtual {v1}, Landroid/app/Notification$Builder;->build()Landroid/app/Notification;
+ 
+     move-result-object v7
+ 
+-    goto/16 :goto_0
++    goto/16 :goto_1
+ .end method
+ 
+ .method private onVolumeRemoved(Landroid/os/storage/VolumeInfo;)Landroid/app/Notification;

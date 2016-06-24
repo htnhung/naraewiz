@@ -1,0 +1,255 @@
+diff -urN services_hero_ape7_orig.jar/smali/com/android/server/notification/NotificationManagerService$6.smali services_hero_ape7.jar/smali/com/android/server/notification/NotificationManagerService$6.smali
+--- services_hero_ape7_orig.jar/smali/com/android/server/notification/NotificationManagerService$6.smali	2016-06-24 05:28:46.548563500 +0900
++++ services_hero_ape7.jar/smali/com/android/server/notification/NotificationManagerService$6.smali	2016-06-05 21:48:28.177132600 +0900
+@@ -1329,7 +1329,7 @@
+ .end method
+ 
+ .method public enqueueEdgeNotification(Ljava/lang/String;Ljava/lang/String;ILandroid/os/Bundle;I)V
+-    .locals 0
++    .locals 8
+     .param p1, "pkg"    # Ljava/lang/String;
+     .param p2, "opPkg"    # Ljava/lang/String;
+     .param p3, "id"    # I
+@@ -1337,6 +1337,33 @@
+     .param p5, "userId"    # I
+ 
+     .prologue
++    .line 2020
++    # invokes: Lcom/android/server/notification/NotificationManagerService;->checkCallerIsSystemOrSameApp(Ljava/lang/String;)V
++    invoke-static {p1}, Lcom/android/server/notification/NotificationManagerService;->access$3400(Ljava/lang/String;)V
++
++    .line 2021
++    iget-object v0, p0, Lcom/android/server/notification/NotificationManagerService$6;->this$0:Lcom/android/server/notification/NotificationManagerService;
++
++    invoke-static {}, Landroid/os/Binder;->getCallingUid()I
++
++    move-result v3
++
++    invoke-static {}, Landroid/os/Binder;->getCallingPid()I
++
++    move-result v4
++
++    move-object v1, p1
++
++    move-object v2, p2
++
++    move v5, p3
++
++    move-object v6, p4
++
++    move v7, p5
++
++    invoke-virtual/range {v0 .. v7}, Lcom/android/server/notification/NotificationManagerService;->enqueueEdgeNotificationInternal(Ljava/lang/String;Ljava/lang/String;IIILandroid/os/Bundle;I)V
++
+     .line 2023
+     return-void
+ .end method
+@@ -3155,13 +3182,61 @@
+ .end method
+ 
+ .method public removeEdgeNotification(Ljava/lang/String;ILandroid/os/Bundle;I)V
+-    .locals 0
++    .locals 7
+     .param p1, "pkg"    # Ljava/lang/String;
+     .param p2, "id"    # I
+     .param p3, "extra"    # Landroid/os/Bundle;
+     .param p4, "userId"    # I
+ 
+     .prologue
++    .line 2028
++    # invokes: Lcom/android/server/notification/NotificationManagerService;->checkCallerIsSystemOrSameApp(Ljava/lang/String;)V
++    invoke-static {p1}, Lcom/android/server/notification/NotificationManagerService;->access$3400(Ljava/lang/String;)V
++
++    .line 2029
++    invoke-static {}, Landroid/os/Binder;->getCallingPid()I
++
++    move-result v0
++
++    invoke-static {}, Landroid/os/Binder;->getCallingUid()I
++
++    move-result v1
++
++    const/4 v3, 0x1
++
++    const/4 v4, 0x0
++
++    const-string v5, "cancelNotificationWithTag"
++
++    move v2, p4
++
++    move-object v6, p1
++
++    invoke-static/range {v0 .. v6}, Landroid/app/ActivityManager;->handleIncomingUser(IIIZZLjava/lang/String;Ljava/lang/String;)I
++
++    move-result p4
++
++    .line 2032
++    iget-object v0, p0, Lcom/android/server/notification/NotificationManagerService$6;->this$0:Lcom/android/server/notification/NotificationManagerService;
++
++    invoke-static {}, Landroid/os/Binder;->getCallingUid()I
++
++    move-result v1
++
++    invoke-static {}, Landroid/os/Binder;->getCallingPid()I
++
++    move-result v2
++
++    move-object v3, p1
++
++    move v4, p2
++
++    move-object v5, p3
++
++    move v6, p4
++
++    invoke-virtual/range {v0 .. v6}, Lcom/android/server/notification/NotificationManagerService;->removeEdgeNotificationInternal(IILjava/lang/String;ILandroid/os/Bundle;I)V
++
+     .line 2034
+     return-void
+ .end method
+diff -urN services_hero_ape7_orig.jar/smali/com/android/server/power/PowerManagerService.smali services_hero_ape7.jar/smali/com/android/server/power/PowerManagerService.smali
+--- services_hero_ape7_orig.jar/smali/com/android/server/power/PowerManagerService.smali	2016-06-24 05:28:48.548708600 +0900
++++ services_hero_ape7.jar/smali/com/android/server/power/PowerManagerService.smali	2016-06-05 22:07:07.849906100 +0900
+@@ -3284,7 +3284,7 @@
+ 
+     .line 1469
+     .local v12, "index":I
+-    if-ltz v12, :cond_2
++    if-ltz v12, :cond_4
+ 
+     .line 1470
+     iget-object v2, p0, Lcom/android/server/power/PowerManagerService;->mWakeLocks:Ljava/util/ArrayList;
+@@ -3373,8 +3373,40 @@
+ 
+     sparse-switch v2, :sswitch_data_0
+ 
+-    .line 1528
++    .line 1519
+     :goto_1
++    iget-object v2, p0, Lcom/android/server/power/PowerManagerService;->mCocktailBarManagerInternal:Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    if-nez v2, :cond_1
++
++    .line 1520
++    const-class v2, Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    invoke-static {v2}, Lcom/android/server/LocalServices;->getService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v2
++
++    check-cast v2, Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    iput-object v2, p0, Lcom/android/server/power/PowerManagerService;->mCocktailBarManagerInternal:Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    .line 1522
++    :cond_1
++    iget-object v2, p0, Lcom/android/server/power/PowerManagerService;->mCocktailBarManagerInternal:Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    if-eqz v2, :cond_2
++
++    .line 1523
++    iget-object v2, p0, Lcom/android/server/power/PowerManagerService;->mCocktailBarManagerInternal:Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;
++
++    iget v3, v1, Lcom/android/server/power/PowerManagerService$WakeLock;->mFlags:I
++
++    iget-object v4, v1, Lcom/android/server/power/PowerManagerService$WakeLock;->mTag:Ljava/lang/String;
++
++    invoke-virtual {v2, v3, v4}, Lcom/samsung/android/cocktailbar/CocktailBarManagerInternal;->turnOffWakupCocktailBarFromPowerManager(ILjava/lang/String;)V
++
++    .line 1528
++    :cond_2
+     move/from16 v0, p7
+ 
+     invoke-direct {p0, v1, v0}, Lcom/android/server/power/PowerManagerService;->applyWakeLockFlagsOnAcquireLocked(Lcom/android/server/power/PowerManagerService$WakeLock;I)V
+@@ -3390,13 +3422,13 @@
+     invoke-direct {p0}, Lcom/android/server/power/PowerManagerService;->updatePowerStateLocked()V
+ 
+     .line 1531
+-    if-eqz v13, :cond_1
++    if-eqz v13, :cond_3
+ 
+     .line 1537
+     invoke-direct {p0, v1}, Lcom/android/server/power/PowerManagerService;->notifyWakeLockAcquiredLocked(Lcom/android/server/power/PowerManagerService$WakeLock;)V
+ 
+     .line 1539
+-    :cond_1
++    :cond_3
+     monitor-exit v14
+ 
+     .line 1540
+@@ -3405,7 +3437,7 @@
+     .line 1482
+     .end local v1    # "wakeLock":Lcom/android/server/power/PowerManagerService$WakeLock;
+     .end local v13    # "notifyAcquire":Z
+-    :cond_2
++    :cond_4
+     new-instance v1, Lcom/android/server/power/PowerManagerService$WakeLock;
+ 
+     move-object v2, p0
+@@ -3464,7 +3496,7 @@
+ 
+     move-result v2
+ 
+-    if-eqz v2, :cond_3
++    if-eqz v2, :cond_5
+ 
+     invoke-static {}, Landroid/os/Process;->myUid()I
+ 
+@@ -3472,7 +3504,7 @@
+ 
+     move/from16 v0, p7
+ 
+-    if-eq v0, v2, :cond_3
++    if-eq v0, v2, :cond_5
+ 
+     .line 1497
+     const/4 v2, 0x1
+@@ -3480,7 +3512,7 @@
+     invoke-direct {p0, v1, v2}, Lcom/android/server/power/PowerManagerService;->updateBlockedWakelock(Lcom/android/server/power/PowerManagerService$WakeLock;Z)Z
+ 
+     .line 1499
+-    :cond_3
++    :cond_5
+     const/4 v13, 0x1
+ 
+     .restart local v13    # "notifyAcquire":Z
+@@ -3542,7 +3574,7 @@
+ 
+     invoke-static {v2, v3}, Landroid/util/EventLog;->writeEvent(I[Ljava/lang/Object;)I
+ 
+-    goto :goto_1
++    goto/16 :goto_1
+ 
+     .line 1512
+     :sswitch_1
+@@ -7879,7 +7911,7 @@
+     invoke-virtual {p1}, Ljava/io/PrintWriter;->println()V
+ 
+     .line 5104
+-    const-string v8, "SEC_PRODUCT_FEATURE_COMMON_SUPPORT_COCKTAIL_FW: false"
++    const-string v8, "SEC_PRODUCT_FEATURE_COMMON_SUPPORT_COCKTAIL_FW: true"
+ 
+     invoke-virtual {p1, v8}, Ljava/io/PrintWriter;->println(Ljava/lang/String;)V
+ 
+diff -urN services_hero_ape7_orig.jar/smali/com/android/server/SystemServer.smali services_hero_ape7.jar/smali/com/android/server/SystemServer.smali
+--- services_hero_ape7_orig.jar/smali/com/android/server/SystemServer.smali	2016-06-24 05:28:41.869329400 +0900
++++ services_hero_ape7.jar/smali/com/android/server/SystemServer.smali	2016-06-05 22:06:34.184782400 +0900
+@@ -5913,8 +5913,17 @@
+     :try_end_85
+     .catch Ljava/lang/Throwable; {:try_start_85 .. :try_end_85} :catch_54
+ 
+-    .line 2028
++    .line 2010
+     :goto_59
++    move-object/from16 v0, p0
++
++    iget-object v6, v0, Lcom/android/server/SystemServer;->mSystemServiceManager:Lcom/android/server/SystemServiceManager;
++
++    const-string v7, "com.android.server.cocktailbar.CocktailBarManagerService"
++
++    invoke-virtual {v6, v7}, Lcom/android/server/SystemServiceManager;->startService(Ljava/lang/String;)Lcom/android/server/SystemService;
++
++    .line 2028
+     :try_start_86
+     const-string v6, "SystemServer"
+ 

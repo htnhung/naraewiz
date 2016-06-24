@@ -1,0 +1,21 @@
+diff -urN framework_hero_ape7_orig.jar/smali_classes2/com/samsung/android/multiwindow/MultiWindowApplicationInfos.smali framework_hero_ape7.jar/smali_classes2/com/samsung/android/multiwindow/MultiWindowApplicationInfos.smali
+--- framework_hero_ape7_orig.jar/smali_classes2/com/samsung/android/multiwindow/MultiWindowApplicationInfos.smali	2016-06-24 05:27:40.080023900 +0900
++++ framework_hero_ape7.jar/smali_classes2/com/samsung/android/multiwindow/MultiWindowApplicationInfos.smali	2016-06-05 22:16:31.091264200 +0900
+@@ -868,7 +868,7 @@
+ 
+     .line 273
+     :cond_2
+-    const/4 v0, 0x1
++    const/4 v0, 0x0
+ 
+     goto :goto_0
+ .end method
+@@ -904,7 +904,7 @@
+     return v0
+ 
+     :cond_1
+-    const/4 v0, 0x0
++    const/4 v0, 0x1
+ 
+     goto :goto_0
+ .end method

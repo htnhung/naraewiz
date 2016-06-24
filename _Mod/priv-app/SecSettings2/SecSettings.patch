@@ -1,0 +1,17 @@
+diff -urN SecSettings2_hero_ape7_orig.apk/smali/com/android/settings/DisplaySettings.smali SecSettings2_hero_ape7.apk/smali/com/android/settings/DisplaySettings.smali
+--- SecSettings2_hero_ape7_orig.apk/smali/com/android/settings/DisplaySettings.smali	2016-06-24 05:26:29.380881600 +0900
++++ SecSettings2_hero_ape7.apk/smali/com/android/settings/DisplaySettings.smali	2016-06-06 00:11:40.855669700 +0900
+@@ -4888,13 +4888,6 @@
+ 
+     .line 429
+     :cond_7
+-    const-string v25, "touch_key_light"
+-
+-    move-object/from16 v0, p0
+-
+-    move-object/from16 v1, v25
+-
+-    invoke-virtual {v0, v1}, Lcom/android/settings/DisplaySettings;->removePreference(Ljava/lang/String;)V
+ 
+     .line 432
+     :cond_8

@@ -1,0 +1,12 @@
+diff -urN SamsungCamera5_hero_ape7_orig.apk/smali/com/sec/android/app/camera/setting/CameraSettingsImpl.smali SamsungCamera5_hero_ape7.apk/smali/com/sec/android/app/camera/setting/CameraSettingsImpl.smali
+--- SamsungCamera5_hero_ape7_orig.apk/smali/com/sec/android/app/camera/setting/CameraSettingsImpl.smali	2016-06-24 05:26:12.350528100 +0900
++++ SamsungCamera5_hero_ape7.apk/smali/com/sec/android/app/camera/setting/CameraSettingsImpl.smali	2016-06-06 00:10:27.919231800 +0900
+@@ -7612,6 +7612,8 @@
+ 
+     move-result v1
+ 
++    const/4 v1, 0x0
++
+     .line 1461
+     :cond_0
+     const-string v2, "CameraSettings"

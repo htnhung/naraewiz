@@ -11,8 +11,16 @@ if [ -e $1/framework/oat ]; then
 fi
 
 SYSDIR=$1 # system dir
+NWDIR=$PWD # script location
 PREBUILTDIR=$(realpath _Prebuilt)
 PATCHDIR=$(realpath _Patch)
+MODDIR=$(realpath _Mod)
+
+if [ -e /mnt/c/Windows ]; then
+	IS_LINUX=0
+else
+	IS_LINUX=1
+fi
 
 ECHOINFO() {
 	echo "$(tput bold) ::: $@ :::$(tput sgr0)"
@@ -27,14 +35,12 @@ APPLY_PATCH() {
 	echo "Applying patch $1"
 	patch -p1 --forward --merge --no-backup-if-mismatch < $1
 	if [ $? -ne 0 ]; then
-		while read -p "$(tput setaf 1)$(tput bold)Patch failed, abort? (y/N)$(tput sgr0)" PATCH_CONTINUE; do
-			case "$PATCH_CONTINUE" in
-			Y | y )
-				exit 1;;
-			* )
-				break;;
-			esac
-		done
+	while read -p "$(tput setaf 1)$(tput bold)Patch failed, abort? (y/N)$(tput sgr0)" PATCH_CONTINUE; do
+		case "$PATCH_CONTINUE" in
+		Y | y) exit 1;;
+		* ) break;;
+		esac
+	done
 	fi
 }
 
@@ -51,7 +57,7 @@ sed -i -e 's/buildinfo.sh/buildinfo.sh\n# Powered by NaraeWiz!/g' build.prop
 # Clean up unnecessary stuff
 #
 ECHOINFO "Removing spys"
-cat remove.txt | while read file; do
+cat $NWDIR/remove.txt | while read file; do
 	rm -rf $file
 done
 echo "Possible knox leftovers :"
@@ -79,8 +85,33 @@ ECHOINFO "Prepare for new bootanimations"
 # Apply patches
 #
 ECHOINFO "Applying patches"
-find $PATCHDIR -name '*.patch' | while read file; do APPLY_PATCH $file; done
-find $PATCHDIR -name '*.sh' | while read file; do . $file; done
+for i in $PATCHDIR/*.patch; do APPLY_PATCH $i; done
+for i in $PATCHDIR/*.sh; do $i; done
+#find $PATCHDIR -name '*.patch' | while read file; do APPLY_PATCH $file; done
+#find $PATCHDIR -name '*.sh' | while read file; do $file; done
+
+#
+# Apply patches for MODs
+#
+ECHOINFO "Modding apk's & jar's"
+for WORKDIR in app priv-app framework; do
+ls $MODDIR/$WORKDIR | while read i; do
+	cd $WORKDIR/$i || cd $WORKDIR
+	apktool d $i.apk || apktool d $i.jar
+	cd $i
+	for k in $MODDIR/$WORKDIR/$i/*.patch; do APPLY_PATCH $k; done
+	for k in $MODDIR/$WORKDIR/$i/*.sh; do $k; done
+	apktool b -c . || ABORT
+	if [ $IS_LINUX -eq 1 ]; then
+		zipalign -f 4 dist/$i.apk ../$i.apk || zipalign -f 4 dist/$i.jar ../$i.jar
+	else
+		cp dist/$i.* ../
+	fi
+	cd ..
+	rm -rf $i
+	cd $SYSDIR	
+done
+done
 
 #
 # Import prebuilts
@@ -90,9 +121,26 @@ ls -d $PREBUILTDIR/*/ | while read file; do cp -R $file/* ./; done
 
 #
 # Optimize framework : I need to find a zipalign binary that works on bash on windows first.
+# So, only for linux users at the moment.
 #
-#ECHOINFO "Optimizing framework files"
-#find . -type f -name '*.jar' -maxdepth 1 | while read i; do 7z x $i -otest &>NUL; cd test; jar -cf0M $i *; zipalign -f 4 $i ../$i; cd ..; rm -r test; done
-#find . -type f -name '*.apk' -maxdepth 1 | while read i; do 7z x $i -otest &>NUL; cd test; 7z a -tzip $i * -mx0 &>NUL; zipalign -f 4 $i ../$i; cd ..; rm -r test; done
+if [ $IS_LINUX -eq 1 ]; then
+ECHOINFO "Optimizing framework files"
+find . -type f -name '*.jar' -maxdepth 1 | while read file; do
+	7z x $file -otest &> /dev/null
+	cd test
+	jar -cf0M $file *
+	zipalign -f 4 $file ../$file
+	cd ..
+	rm -r test
+done
+find . -type f -name '*.apk' -maxdepth 1 | while read file; do
+	7z x $file -otest &> /dev/null
+	cd test
+	7z a -tzip $file * -mx0 &> /dev/null
+	zipalign -f 4 $file ../$file
+	cd ..
+	rm -r test
+done
+fi
 
 ECHOINFO "DONE."
